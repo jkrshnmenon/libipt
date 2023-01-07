@@ -106,7 +106,11 @@ endif()
 include_directories(
   include
   ${CMAKE_CURRENT_BINARY_DIR}/libipt/include
-  /home/jay/git_stuff/xed/build/kits/xed-install-base-2022-12-27-lin-x86-64/include/xed
+  ${CMAKE_CURRENT_SOURCE_DIR}/../xed/build/kits/xed-install-base-2022-12-27-lin-x86-64/include/xed
+)
+
+link_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/../xed/build/kits/xed-install-base-2022-12-27-lin-x86-64/lib
 )
 
 if (PTUNIT)
