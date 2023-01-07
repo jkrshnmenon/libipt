@@ -48,7 +48,11 @@ add_executable(ptdump
   ${PTDUMP_FILES}
 )
 
-add_library(ptdecode STATIC
+add_library(ptdecode_static STATIC
+  ${LIBPTDUMP_FILES}
+)
+
+add_library(ptdecode SHARED
   ${LIBPTDUMP_FILES}
 )
 
