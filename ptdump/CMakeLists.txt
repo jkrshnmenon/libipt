@@ -37,8 +37,19 @@ set(PTDUMP_FILES
   ../libipt/src/pt_time.c
 )
 
+set(LIBPTDUMP_FILES
+  src/libptdump.c
+  ../libipt/src/pt_last_ip.c
+  ../libipt/src/pt_cpu.c
+  ../libipt/src/pt_time.c
+)
+
 add_executable(ptdump
   ${PTDUMP_FILES}
+)
+
+add_library(ptdecode STATIC
+  ${LIBPTDUMP_FILES}
 )
 
 target_link_libraries(ptdump libipt)
