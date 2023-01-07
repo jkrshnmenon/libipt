@@ -34,6 +34,7 @@
 #include "pt_version.h"
 
 #include "intel-pt.h"
+#include "sync.h"
 
 #if defined(FEATURE_SIDEBAND)
 #  include "libipt-sb.h"

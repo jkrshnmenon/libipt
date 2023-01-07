@@ -39,6 +39,7 @@ set(PTDUMP_FILES
 
 set(LIBPTDUMP_FILES
   src/libptdump.c
+  src/sync.c
   ../libipt/src/pt_last_ip.c
   ../libipt/src/pt_cpu.c
   ../libipt/src/pt_time.c
