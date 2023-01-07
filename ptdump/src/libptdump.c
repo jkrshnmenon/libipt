@@ -78,7 +78,8 @@ void fix_upper_bits(size_t current, int bit_len) {
 
 	size_t prev = ip_table[ip_table_ctr];	
 	size_t actual = ((prev >> bit_len) << bit_len) + current;
-	append_to_table(actual);
+	update_bb(actual);
+	// append_to_table(actual);
 	return;
 }
 
