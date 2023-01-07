@@ -56,6 +56,8 @@
 size_t *ip_table = NULL;
 size_t ip_table_size, ip_table_ctr;
 
+int debug_mode = 0;
+
 
 void append_to_table(size_t addr) {
 	if ( ip_table_ctr == ip_table_size) {
@@ -72,14 +74,19 @@ void append_to_table(size_t addr) {
 
 void fix_upper_bits(size_t current, int bit_len) {
 	if (ip_table_ctr == 0 || bit_len == 64) {
-		append_to_table(current);
+		if (debug_mode)
+			append_to_table(current);
+		else
+			update_bb(current);
 		return;
 	}
 
 	size_t prev = ip_table[ip_table_ctr];	
 	size_t actual = ((prev >> bit_len) << bit_len) + current;
-	update_bb(actual);
-	// append_to_table(actual);
+	if (debug_mode)
+		append_to_table(actual);
+	else
+		update_bb(actual);
 	return;
 }
 
@@ -90,6 +97,11 @@ void pp_table() {
 		printf("[%ld] 0x%016lx\n", i, ip_table[i]);
 	}
 	return;
+}
+
+
+void enable_debug() {
+	debug_mode = 1;
 }
 
 
