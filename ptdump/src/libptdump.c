@@ -1488,6 +1488,7 @@ pt_export int do_main(char *ptfile)
 		goto out;
 	}
 
+	fprintf(stderr, "Loading file: %s\n", ptfile);
 	errcode = load_pt(&config, ptfile, 0, 0, "ptdump");
 	if (errcode < 0)
 		goto out;
