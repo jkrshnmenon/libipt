@@ -22,7 +22,7 @@ void fuzzme() {
         return;
 }
 
-char dummy[MAP_SIZE] = {}
+char dummy[MAP_SIZE] = {};
 char *trace_map = &dummy;
 unsigned int prev_id = 0;
 size_t afl_prev_loc = 0;
