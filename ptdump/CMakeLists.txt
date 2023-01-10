@@ -49,15 +49,13 @@ add_executable(ptdump
   ${PTDUMP_FILES}
 )
 
-add_library(ptdecode_static STATIC
-  ${LIBPTDUMP_FILES}
-)
-
 add_library(ptdecode SHARED
   ${LIBPTDUMP_FILES}
 )
 
+
 target_link_libraries(ptdump libipt)
+target_link_libraries(ptdecode ${CMAKE_BINARY_DIR}/lib/libipt_static.a)
 if (SIDEBAND)
   target_link_libraries(ptdump libipt-sb)
 endif (SIDEBAND)

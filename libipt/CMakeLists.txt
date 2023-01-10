@@ -90,6 +90,9 @@ add_library(libipt
   ${LIBIPT_FILES}
 )
 
+add_library(ipt_static STATIC
+  ${LIBIPT_FILES}
+)
 # put the version into the intel-pt header
 #
 configure_file(
