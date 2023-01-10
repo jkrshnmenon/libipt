@@ -40,9 +40,6 @@ set(PTDUMP_FILES
 set(LIBPTDUMP_FILES
   src/libptdump.c
   src/sync.c
-  ../libipt/src/pt_last_ip.c
-  ../libipt/src/pt_cpu.c
-  ../libipt/src/pt_time.c
 )
 
 add_executable(ptdump
@@ -52,7 +49,6 @@ add_executable(ptdump
 add_library(ptdecode SHARED
   ${LIBPTDUMP_FILES}
 )
-
 
 target_link_libraries(ptdump libipt)
 target_link_libraries(ptdecode ${CMAKE_BINARY_DIR}/lib/libipt_static.a)
