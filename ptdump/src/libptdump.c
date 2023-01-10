@@ -305,8 +305,8 @@ int load_file(uint8_t **buffer, size_t *psize, const char *filename,
 
 	content = malloc((size_t) fsize);
 	if (!content) {
-		fprintf(stderr, "%s: failed to allocated memory %s.\n",
-			prog, filename);
+		fprintf(stderr, "%s: failed to allocated memory (%lu bytes) %s.\n",
+			prog, fsize, filename);
 		goto err_file;
 	}
 
