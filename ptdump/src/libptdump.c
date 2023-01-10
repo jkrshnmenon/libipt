@@ -34,7 +34,6 @@
 #include "pt_version.h"
 
 #include "intel-pt.h"
-#include "sync.h"
 
 #if defined(FEATURE_SIDEBAND)
 #  include "libipt-sb.h"
@@ -51,6 +50,7 @@
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #  define snprintf _snprintf_c
 #endif
+
 
 
 size_t *ip_table = NULL;
@@ -91,7 +91,7 @@ void fix_upper_bits(size_t current, int bit_len) {
 }
 
 
-void pp_table() {
+pt_export void pp_table() {
 	size_t i = 0;
 	for ( i = 0; i < ip_table_ctr; i++) {
 		printf("[%ld] 0x%016lx\n", i, ip_table[i]);
@@ -100,7 +100,7 @@ void pp_table() {
 }
 
 
-void enable_debug() {
+pt_export void enable_debug() {
 	debug_mode = 1;
 }
 
@@ -230,19 +230,19 @@ struct ptdump_tracking {
 };
 
 
-static int no_file_error(const char *name)
+int no_file_error(const char *name)
 {
 	fprintf(stderr, "%s: No processor trace file specified.\n", name);
 	return -1;
 }
 
-static int unknown_option_error(const char *arg, const char *name)
+int unknown_option_error(const char *arg, const char *name)
 {
 	fprintf(stderr, "%s: unknown option: %s.\n", name, arg);
 	return -1;
 }
 
-static int load_file(uint8_t **buffer, size_t *psize, const char *filename,
+int load_file(uint8_t **buffer, size_t *psize, const char *filename,
 		     uint64_t offset, uint64_t size, const char *prog)
 {
 	uint8_t *content;
@@ -339,7 +339,7 @@ err_file:
 	return -1;
 }
 
-static int load_pt(struct pt_config *config, const char *filename,
+int load_pt(struct pt_config *config, const char *filename,
 		   uint64_t foffset, uint64_t fsize, const char *prog)
 {
 	uint8_t *buffer;
@@ -356,7 +356,7 @@ static int load_pt(struct pt_config *config, const char *filename,
 	return 0;
 }
 
-static int diag(const char *errstr, uint64_t offset, int errcode)
+int diag(const char *errstr, uint64_t offset, int errcode)
 {
 	if (errcode)
 		printf("[%" PRIx64 ": %s: %s]\n", offset, errstr,
@@ -367,7 +367,7 @@ static int diag(const char *errstr, uint64_t offset, int errcode)
 	return errcode;
 }
 
-static void ptdump_tracking_init(struct ptdump_tracking *tracking)
+void ptdump_tracking_init(struct ptdump_tracking *tracking)
 {
 	if (!tracking)
 		return;
@@ -384,7 +384,7 @@ static void ptdump_tracking_init(struct ptdump_tracking *tracking)
 	tracking->in_header = 0;
 }
 
-static void ptdump_tracking_reset(struct ptdump_tracking *tracking)
+void ptdump_tracking_reset(struct ptdump_tracking *tracking)
 {
 	if (!tracking)
 		return;
@@ -398,7 +398,7 @@ static void ptdump_tracking_reset(struct ptdump_tracking *tracking)
 	tracking->in_header = 0;
 }
 
-static void ptdump_tracking_fini(struct ptdump_tracking *tracking)
+void ptdump_tracking_fini(struct ptdump_tracking *tracking)
 {
 	if (!tracking)
 		return;
@@ -421,7 +421,7 @@ static void ptdump_tracking_fini(struct ptdump_tracking *tracking)
 	} while (0)									\
 
 
-static int print_buffer(struct ptdump_buffer *buffer, uint64_t offset,
+int print_buffer(struct ptdump_buffer *buffer, uint64_t offset,
 			const struct ptdump_options *options)
 {
 	const char *sep;
@@ -473,7 +473,7 @@ static int print_buffer(struct ptdump_buffer *buffer, uint64_t offset,
 	return 0;
 }
 
-static int print_raw(struct ptdump_buffer *buffer, uint64_t offset,
+int print_raw(struct ptdump_buffer *buffer, uint64_t offset,
 		     const struct pt_packet *packet,
 		     const struct pt_config *config)
 {
@@ -504,7 +504,7 @@ static int print_raw(struct ptdump_buffer *buffer, uint64_t offset,
 	return 0;
 }
 
-static int track_last_ip(struct ptdump_buffer *buffer,
+int track_last_ip(struct ptdump_buffer *buffer,
 			 struct pt_last_ip *last_ip, uint64_t offset,
 			 const struct pt_packet_ip *packet,
 			 const struct ptdump_options *options,
@@ -541,7 +541,7 @@ static int track_last_ip(struct ptdump_buffer *buffer,
 }
 
 
-static int print_time(struct ptdump_buffer *buffer,
+int print_time(struct ptdump_buffer *buffer,
 		      struct ptdump_tracking *tracking, uint64_t offset,
 		      const struct ptdump_options *options)
 {
@@ -586,7 +586,7 @@ static int print_time(struct ptdump_buffer *buffer,
 	return 0;
 }
 
-static int print_tcal(struct ptdump_buffer *buffer,
+int print_tcal(struct ptdump_buffer *buffer,
 		      struct ptdump_tracking *tracking, uint64_t offset,
 		      const struct ptdump_options *options)
 {
@@ -629,7 +629,7 @@ static int print_tcal(struct ptdump_buffer *buffer,
 	return 0;
 }
 
-static int sb_track_time(struct ptdump_tracking *tracking,
+int sb_track_time(struct ptdump_tracking *tracking,
 			 const struct ptdump_options *options, uint64_t offset)
 {
 	uint64_t tsc;
@@ -651,7 +651,7 @@ static int sb_track_time(struct ptdump_tracking *tracking,
 	return 0;
 }
 
-static int track_time(struct ptdump_buffer *buffer,
+int track_time(struct ptdump_buffer *buffer,
 		      struct ptdump_tracking *tracking, uint64_t offset,
 		      const struct ptdump_options *options)
 {
@@ -667,7 +667,7 @@ static int track_time(struct ptdump_buffer *buffer,
 	return sb_track_time(tracking, options, offset);
 }
 
-static int track_tsc(struct ptdump_buffer *buffer,
+int track_tsc(struct ptdump_buffer *buffer,
 		     struct ptdump_tracking *tracking,  uint64_t offset,
 		     const struct pt_packet_tsc *packet,
 		     const struct ptdump_options *options,
@@ -693,7 +693,7 @@ static int track_tsc(struct ptdump_buffer *buffer,
 	return track_time(buffer, tracking, offset, options);
 }
 
-static int track_cbr(struct ptdump_buffer *buffer,
+int track_cbr(struct ptdump_buffer *buffer,
 		     struct ptdump_tracking *tracking,  uint64_t offset,
 		     const struct pt_packet_cbr *packet,
 		     const struct ptdump_options *options,
@@ -722,7 +722,7 @@ static int track_cbr(struct ptdump_buffer *buffer,
 	return track_time(buffer, tracking, offset, options);
 }
 
-static int track_tma(struct ptdump_buffer *buffer,
+int track_tma(struct ptdump_buffer *buffer,
 		     struct ptdump_tracking *tracking,  uint64_t offset,
 		     const struct pt_packet_tma *packet,
 		     const struct ptdump_options *options,
@@ -749,7 +749,7 @@ static int track_tma(struct ptdump_buffer *buffer,
 	return track_time(buffer, tracking, offset, options);
 }
 
-static int track_mtc(struct ptdump_buffer *buffer,
+int track_mtc(struct ptdump_buffer *buffer,
 		     struct ptdump_tracking *tracking,  uint64_t offset,
 		     const struct pt_packet_mtc *packet,
 		     const struct ptdump_options *options,
@@ -773,7 +773,7 @@ static int track_mtc(struct ptdump_buffer *buffer,
 	return track_time(buffer, tracking, offset, options);
 }
 
-static int track_cyc(struct ptdump_buffer *buffer,
+int track_cyc(struct ptdump_buffer *buffer,
 		     struct ptdump_tracking *tracking,  uint64_t offset,
 		     const struct pt_packet_cyc *packet,
 		     const struct ptdump_options *options,
@@ -810,7 +810,7 @@ static int track_cyc(struct ptdump_buffer *buffer,
 	return track_time(buffer, tracking, offset, options);
 }
 
-static uint64_t sext(uint64_t val, uint8_t sign)
+uint64_t sext(uint64_t val, uint8_t sign)
 {
 	uint64_t signbit, mask;
 
@@ -820,7 +820,7 @@ static uint64_t sext(uint64_t val, uint8_t sign)
 	return val & signbit ? val | mask : val & ~mask;
 }
 
-static int print_ip_payload(struct ptdump_buffer *buffer, uint64_t offset,
+int print_ip_payload(struct ptdump_buffer *buffer, uint64_t offset,
 			    const struct pt_packet_ip *packet)
 {
 	if (!buffer || !packet)
@@ -870,7 +870,7 @@ static int print_ip_payload(struct ptdump_buffer *buffer, uint64_t offset,
 	return diag("bad ipc", offset, -pte_bad_packet);
 }
 
-static int print_tnt_payload(struct ptdump_buffer *buffer, uint64_t offset,
+int print_tnt_payload(struct ptdump_buffer *buffer, uint64_t offset,
 			     const struct pt_packet_tnt *packet)
 {
 	uint64_t tnt;
@@ -898,7 +898,7 @@ static int print_tnt_payload(struct ptdump_buffer *buffer, uint64_t offset,
 	return 0;
 }
 
-static const char *print_exec_mode(const struct pt_packet_mode_exec *packet,
+const char *print_exec_mode(const struct pt_packet_mode_exec *packet,
 				   uint64_t offset)
 {
 	enum pt_exec_mode mode;
@@ -922,7 +922,7 @@ static const char *print_exec_mode(const struct pt_packet_mode_exec *packet,
 	return "invalid";
 }
 
-static const char *print_pwrx_wr(const struct pt_packet_pwrx *packet)
+const char *print_pwrx_wr(const struct pt_packet_pwrx *packet)
 {
 	const char *wr;
 
@@ -951,7 +951,7 @@ static const char *print_pwrx_wr(const struct pt_packet_pwrx *packet)
 	return wr;
 }
 
-static int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
+int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
 			const struct pt_packet *packet,
 			struct ptdump_tracking *tracking,
 			const struct ptdump_options *options,
@@ -1255,7 +1255,7 @@ static int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
 	return diag("unknown packet", offset, -pte_bad_opc);
 }
 
-static int dump_one_packet(uint64_t offset, const struct pt_packet *packet,
+int dump_one_packet(uint64_t offset, const struct pt_packet *packet,
 			   struct ptdump_tracking *tracking,
 			   const struct ptdump_options *options,
 			   const struct pt_config *config)
@@ -1281,7 +1281,7 @@ static int dump_one_packet(uint64_t offset, const struct pt_packet *packet,
 	return print_buffer(&buffer, offset, options);
 }
 
-static int dump_packets(struct pt_packet_decoder *decoder,
+int dump_packets(struct pt_packet_decoder *decoder,
 			struct ptdump_tracking *tracking,
 			const struct ptdump_options *options,
 			const struct pt_config *config)
@@ -1312,7 +1312,7 @@ static int dump_packets(struct pt_packet_decoder *decoder,
 	}
 }
 
-static int dump_sync(struct pt_packet_decoder *decoder,
+int dump_sync(struct pt_packet_decoder *decoder,
 		     struct ptdump_tracking *tracking,
 		     const struct ptdump_options *options,
 		     const struct pt_config *config)
@@ -1355,7 +1355,7 @@ static int dump_sync(struct pt_packet_decoder *decoder,
 	return errcode;
 }
 
-static int dump(struct ptdump_tracking *tracking,
+int dump(struct ptdump_tracking *tracking,
 		const struct pt_config *config,
 		const struct ptdump_options *options)
 {
@@ -1384,7 +1384,7 @@ static int dump(struct ptdump_tracking *tracking,
 }
 
 
-static int get_arg_uint64(uint64_t *value, const char *option, const char *arg,
+int get_arg_uint64(uint64_t *value, const char *option, const char *arg,
 			  const char *prog)
 {
 	char *rest;
@@ -1410,7 +1410,7 @@ static int get_arg_uint64(uint64_t *value, const char *option, const char *arg,
 	return 1;
 }
 
-static int get_arg_uint32(uint32_t *value, const char *option, const char *arg,
+int get_arg_uint32(uint32_t *value, const char *option, const char *arg,
 			  const char *prog)
 {
 	uint64_t val;
@@ -1429,7 +1429,7 @@ static int get_arg_uint32(uint32_t *value, const char *option, const char *arg,
 	return 1;
 }
 
-static int get_arg_uint8(uint8_t *value, const char *option, const char *arg,
+int get_arg_uint8(uint8_t *value, const char *option, const char *arg,
 			 const char *prog)
 {
 	uint64_t val;
@@ -1448,7 +1448,7 @@ static int get_arg_uint8(uint8_t *value, const char *option, const char *arg,
 	return 1;
 }
 
-static int process_args(struct ptdump_options *options)
+int process_args(struct ptdump_options *options)
 {
 	options->no_pad = 1;
 	options->no_timing = 1;
@@ -1457,7 +1457,7 @@ static int process_args(struct ptdump_options *options)
 	return 0;
 }
 
-int do_main(char *ptfile)
+pt_export int do_main(char *ptfile)
 {
 	struct ptdump_tracking tracking;
 	struct ptdump_options options;

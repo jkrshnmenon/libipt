@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/shm.h>
+#include "intel-pt.h"
 #include "afl_hash.h"
 
 #define SHM_ENV_VAR         "__AFL_SHM_ID"
@@ -13,8 +14,6 @@
 
 #define CRASH_EXITCODE		"AFL_CRASH_EXITCODE"
 int crash_exitcode = 0;
-size_t afl_prev_loc = 0;
-
 
 void fuzzme() {
         char buf[10];
@@ -26,6 +25,7 @@ void fuzzme() {
 
 char *trace_map = NULL;
 unsigned int prev_id = 0;
+size_t afl_prev_loc = 0;
 
 
 int map_shm() {
@@ -84,7 +84,7 @@ int wakeup() {
 }
 
 
-int syn() {
+pt_export int syn() {
 	int __afl_temp_data = 0;
 	int n = read(FORKSRV_FD,&__afl_temp_data,4);
 	if ( n != 4 ) {
@@ -95,7 +95,7 @@ int syn() {
 }
 
 
-int ack(int crash) {
+pt_export int ack(int crash) {
 	int __afl_temp_data = 0;
 	if ( crash == 1 ) {
 		__afl_temp_data = crash_exitcode;
@@ -108,8 +108,7 @@ int ack(int crash) {
 	return 0;
 }
 
-
-void update_bb(size_t cur_loc) {
+pt_export void update_bb(size_t cur_loc) {
 	cur_loc = (uintptr_t)(afl_hash_ip((uint64_t)cur_loc));
 	cur_loc &= (MAP_SIZE - 1);
 
@@ -119,14 +118,15 @@ void update_bb(size_t cur_loc) {
 	afl_prev_loc = cur_loc >> 1;
 }
 
-int logbb(unsigned int id) {
+pt_export int logbb(unsigned int id) {
 	trace_map[prev_id ^ id]++;
 	prev_id = id >> 1;
 	return 0;
 }
 
 
-int initialize() {
+
+pt_export int initialize() {
 	if (map_shm() == -1)
 		return -1;
 	if (wakeup() == -1)
@@ -136,3 +136,13 @@ int initialize() {
 
 	return 0;
 }
+
+/*
+void sync_maps() {
+	sync_bitmap(trace_map);
+}
+
+int wrapper_do_main(char *filename) {
+	do_main(filename);
+}
+*/
