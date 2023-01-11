@@ -62,11 +62,20 @@ size_t ip_table_size, ip_table_ctr;
 
 int debug_mode = 0;
 
-int64_t get_micros() {
+void log_message(char *fmt, ...) {
+	struct timeval tval;
+	gettimeofday(&tval, NULL);
+
+	fprintf(stderr, "[%ld.%06ld] ", (long int)tval.tv_sec, (long int)tval.tv_usec);
+
+	va_list argptr;
+	va_start(argptr, fmt);
+
+	vfprintf(stderr, fmt, argptr);
+	va_end(argptr);
 }
 
 void append_to_table(size_t addr) {
-	fprintf(stderr, "%ld\n", get_micros());
 	if ( ip_table_ctr == ip_table_size) {
 		ip_table_size *= 2;
 		ip_table = realloc(ip_table, ip_table_size * sizeof(size_t));
@@ -1466,9 +1475,6 @@ int process_args(struct ptdump_options *options)
 
 pt_export int do_main(char *ptfile)
 {
-	struct timeval tval_before, tval_after, tval_result;
-	gettimeofday(&tval_before, NULL);
-	
 	struct ptdump_tracking tracking;
 	struct ptdump_options options;
 	struct pt_config config;
@@ -1498,18 +1504,15 @@ pt_export int do_main(char *ptfile)
 		goto out;
 	}
 
-	fprintf(stderr, "Loading file: %s\n", ptfile);
+	log_message("Loading file: %s\n", ptfile);
 	errcode = load_pt(&config, ptfile, 0, 0, "ptdump");
 	if (errcode < 0)
 		goto out;
 
+	log_message("Dumping file: %s\n", ptfile);
 	errcode = dump(&tracking, &config, &options);
 
-	gettimeofday(&tval_after, NULL);
-	
-	timersub(&tval_after, &tval_before, &tval_result);
-	
-	fprintf(stderr, "Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+	log_message("Finished file\n");
 
 out:
 	free(ip_table);
