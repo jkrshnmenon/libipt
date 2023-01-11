@@ -424,12 +424,17 @@ void ptdump_tracking_fini(struct ptdump_tracking *tracking)
 #endif
 }
 
+#if 0
 #define print_field(field, ...)					\
 	do {							\
 		/* Avoid partial overwrites. */			\
 		memset(field, 0, sizeof(field));		\
 		snprintf(field, sizeof(field), __VA_ARGS__);	\
 	} while (0)
+#endif
+#define print_field(field, ...)					\
+	do {										\
+	} while(0)									\
 
 
 #define do_printf(field, ...)					\
@@ -977,6 +982,7 @@ int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
 		return diag("error printing packet", offset, -pte_internal);
 
 	switch (packet->type) {
+	/*
 	case ppt_unknown:
 		print_field(buffer->opcode, "<unknown>");
 		return 0;
@@ -1033,6 +1039,7 @@ int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
 	case ppt_stop:
 		print_field(buffer->opcode, "stop");
 		return 0;
+	*/
 
 	case ppt_fup:
 		print_field(buffer->opcode, "fup");
@@ -1081,6 +1088,7 @@ int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
 			    packet->payload.pip.cr3);
 		return 0;
 
+	/*
 	case ppt_vmcs:
 		print_field(buffer->opcode, "vmcs");
 		print_field(buffer->payload.standard, "%" PRIx64,
@@ -1266,6 +1274,10 @@ int print_packet(struct ptdump_buffer *buffer, uint64_t offset,
 			    packet->payload.ptw.ip ? ", ip" : "");
 
 		return 0;
+	
+	*/
+	default:
+		return 0;
 	}
 
 	return diag("unknown packet", offset, -pte_bad_opc);
@@ -1309,11 +1321,15 @@ int dump_packets(struct pt_packet_decoder *decoder,
 	for (;;) {
 		struct pt_packet packet;
 
+		log_message("Calling pt_pkt_get_offset\n");
 		errcode = pt_pkt_get_offset(decoder, &offset);
+		log_message("Done calling pt_pkt_get_offset\n");
 		if (errcode < 0)
 			return diag("error getting offset", offset, errcode);
 
+		log_message("Calling pt_pkt_next\n");
 		errcode = pt_pkt_next(decoder, &packet, sizeof(packet));
+		log_message("Done calling pt_pkt_next\n");
 		if (errcode < 0) {
 			if (errcode == -pte_eos)
 				return 0;
@@ -1321,8 +1337,10 @@ int dump_packets(struct pt_packet_decoder *decoder,
 			return diag("error decoding packet", offset, errcode);
 		}
 
+		log_message("Calling dump_one_packet\n");
 		errcode = dump_one_packet(offset, &packet, tracking, options,
 					  config);
+		log_message("Done calling dump_one_packet\n");
 		if (errcode < 0)
 			return errcode;
 	}
@@ -1353,7 +1371,9 @@ int dump_sync(struct pt_packet_decoder *decoder,
 	}
 
 	for (;;) {
+		log_message("Calling dump_packets\n");
 		errcode = dump_packets(decoder, tracking, options, config);
+		log_message("Done calling dump_packets\n");
 		if (!errcode)
 			break;
 
