@@ -98,7 +98,7 @@ void fix_upper_bits(size_t current, int bit_len) {
 pt_export void pp_table() {
 	size_t i = 0;
 	for ( i = 0; i < ip_table_ctr; i++) {
-		printf("[%ld] 0x%016lx\n", i, ip_table[i]);
+		fprintf(stderr, "[%ld] 0x%016lx\n", i, ip_table[i]);
 	}
 	return;
 }
