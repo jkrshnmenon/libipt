@@ -61,19 +61,7 @@ size_t *ip_table = NULL;
 size_t ip_table_size, ip_table_ctr;
 
 int debug_mode = 0;
-
-void log_message(char *fmt, ...) {
-	struct timeval tval;
-	gettimeofday(&tval, NULL);
-
-	fprintf(stderr, "[%ld.%06ld] ", (long int)tval.tv_sec, (long int)tval.tv_usec);
-
-	va_list argptr;
-	va_start(argptr, fmt);
-
-	vfprintf(stderr, fmt, argptr);
-	va_end(argptr);
-}
+int log_mode = 0;
 
 void append_to_table(size_t addr) {
 	if ( ip_table_ctr == ip_table_size) {
@@ -115,9 +103,27 @@ pt_export void pp_table() {
 	return;
 }
 
-
 pt_export void enable_debug() {
 	debug_mode = 1;
+}
+
+pt_export void enable_log() {
+	log_mode = 1;
+}
+
+void log_message(char *fmt, ...) {
+	if ( log_mode == 1 ){
+		struct timeval tval;
+		gettimeofday(&tval, NULL);
+
+		fprintf(stderr, "[%ld.%06ld] ", (long int)tval.tv_sec, (long int)tval.tv_usec);
+
+		va_list argptr;
+		va_start(argptr, fmt);
+
+		vfprintf(stderr, fmt, argptr);
+		va_end(argptr);
+	}
 }
 
 
