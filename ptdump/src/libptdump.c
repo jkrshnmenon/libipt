@@ -1514,6 +1514,9 @@ pt_export int do_main(char *ptfile)
 
 	ptdump_tracking_init(&tracking);
 
+	if (ip_table != NULL)
+		free(ip_table);
+
 	ip_table_size = 100;
 	ip_table_ctr = 0;
 	ip_table = calloc(ip_table_size, sizeof(size_t));
@@ -1541,7 +1544,7 @@ pt_export int do_main(char *ptfile)
 	log_message("Finished file\n");
 
 out:
-	free(ip_table);
+	// free(ip_table);
 	free(config.begin);
 	ptdump_tracking_fini(&tracking);
 
